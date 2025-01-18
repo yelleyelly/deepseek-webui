@@ -17,7 +17,7 @@ const defaultFunctions: FunctionDefinition[] = [
   {
     id: 'weather',
     name: 'get_weather',
-    description: '获取指定城市的实时天气信息',
+    description: '获取指定城市的天气信息，城市中文需要转换成拼音',
     parameters: {
       type: 'object',
       properties: {
@@ -38,10 +38,10 @@ const defaultFunctions: FunctionDefinition[] = [
       },
       required: ['location'],
     },
-    url: 'https://api.weatherapi.com/v1/current.json?key={WEATHER_API_KEY}&q={location}&aqi={aqi}&lang={lang}',
+    url: 'https://api.weatherapi.com/v1/current.json?q={location}&units={unit}',
     method: 'GET',
     headers: {
-      'Accept': 'application/json',
+      "key": "Yours API Key"
     },
   },
   {

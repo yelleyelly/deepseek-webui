@@ -26,6 +26,9 @@ export async function chatCompletion(
         parameters: func.parameters,
       },
     }));
+    if (!apiKey || apiKey.length < 30) {
+      throw new Error('请先在设置页面配置您的 DeepSeek API Key');
+    }
 
     const response = await fetch(`${API_CONFIG.BASE_URL}/chat/completions`, {
       method: 'POST',
@@ -41,10 +44,33 @@ export async function chatCompletion(
         ...(tools && tools.length > 0 ? { tools } : {}),
         stream: true,
       }),
+    }).catch(error => {
+      const errorMessage = error.message.toLowerCase();
+      if (errorMessage.includes('authentication') || 
+          errorMessage.includes('apikey') || 
+          errorMessage.includes('api key') || 
+          errorMessage.includes('access token') ||
+          errorMessage.includes('unauthorized')) {
+        throw new Error('API Key 无效，请检查您的 API Key 设置');
+      }
+      throw error;
     });
 
     if (!response.ok) {
-      throw new Error(`API 请求失败: ${response.statusText}`);
+      const errorBody = await response.text().catch(() => null);
+      const errorMessage = errorBody?.toLowerCase() || response.statusText.toLowerCase();
+      
+      if (errorMessage.includes('authentication') || 
+          errorMessage.includes('apikey') || 
+          errorMessage.includes('api key') || 
+          errorMessage.includes('access token') ||
+          errorMessage.includes('unauthorized')) {
+        throw new Error('API Key 无效，请检查您的 API Key 设置');
+      }
+      
+      throw new Error(
+        `API 请求失败 (${response.status}): ${response.statusText}\n${errorBody ? `详细信息: ${errorBody}` : ''}`
+      );
     }
 
     if (!response.body) {
