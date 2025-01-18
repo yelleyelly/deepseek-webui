@@ -6,6 +6,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { CopyOutlined, CheckOutlined } from '@ant-design/icons';
 import { Button, message } from 'antd';
 import { useState } from 'react';
+import { Components } from 'react-markdown';
 
 interface MessageContentProps {
   content: string;
@@ -28,7 +29,7 @@ export function MessageContent({ content }: MessageContentProps) {
   return (
     <ReactMarkdown
       components={{
-        code({ node, inline, className, children, ...props }) {
+        code: ({ inline, className, children, ...props }: any) => {
           const match = /language-(\w+)/.exec(className || '');
           const code = String(children).replace(/\n$/, '');
 

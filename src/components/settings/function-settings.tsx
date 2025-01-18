@@ -14,14 +14,14 @@ interface FunctionFormData {
   method: 'GET' | 'POST';
   parameters: {
     type: 'object';
-    properties: Record<string, {
+    properties: string | Record<string, {
       type: string;
       description?: string;
       enum?: string[];
     }>;
     required: string[];
   };
-  headers?: Record<string, string>;
+  headers?: string | Record<string, string>;
 }
 
 export function FunctionSettings() {
