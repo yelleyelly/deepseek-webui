@@ -27,7 +27,7 @@ export default function MainLayout({
           </div>
         </div>
       </Sider>
-      <Layout className="ml-[220px]">
+      <Layout >
         <Content className="h-full overflow-hidden">
           {children}
         </Content>

@@ -21,12 +21,6 @@ const items = [
     children: <SettingsPanel />,
   },
   {
-    key: 'functions',
-    label: '函数设置',
-    icon: <FunctionOutlined />,
-    children: <FunctionSettings />,
-  },
-  {
     key: 'account',
     label: '账号设置',
     icon: <UserOutlined />,
