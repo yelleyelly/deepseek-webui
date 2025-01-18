@@ -13,6 +13,7 @@ import styles from '@/styles/chat/chat-window.module.css';
 export const ChatWindow = () => {
   const messages = useChatStore((state) => state.messages);
   const isLoading = useChatStore((state) => state.isLoading);
+  const currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -21,7 +22,7 @@ export const ChatWindow = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, currentStreamingMessage]);
 
   return (
     <div className={styles.container}>
@@ -65,8 +66,37 @@ export const ChatWindow = () => {
               </Card>
             </motion.div>
           ))}
+          {currentStreamingMessage && (
+            <motion.div
+              key="streaming"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`${styles.messageWrapper} ${styles.messageWrapperAssistant}`}
+            >
+              <Card
+                size="small"
+                className={`${styles.messageCard} ${styles.messageCardAssistant}`}
+                bordered={false}
+              >
+                <div className={styles.messageContent}>
+                  <Avatar
+                    icon={<RobotOutlined />}
+                    className="bg-blue-500"
+                  />
+                  <div className={styles.messageText}>
+                    <div className={styles.messageTextContent}>
+                      <MessageContent content={currentStreamingMessage} />
+                    </div>
+                    <div className={styles.messageTime}>
+                      {formatDate(Date.now())}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          )}
         </AnimatePresence>
-        {isLoading && (
+        {isLoading && !currentStreamingMessage && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

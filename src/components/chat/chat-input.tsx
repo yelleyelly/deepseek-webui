@@ -12,7 +12,15 @@ import { TemplateSelector } from './template-selector';
 
 export const ChatInput = () => {
   const [input, setInput] = useState('');
-  const { addMessage, messages, isLoading, setLoading, clearMessages } = useChatStore();
+  const { 
+    addMessage, 
+    messages, 
+    isLoading, 
+    setLoading, 
+    clearMessages,
+    setCurrentStreamingMessage,
+    appendToLastMessage
+  } = useChatStore();
   const { settings, apiKey } = useSettingsStore();
 
   const sendMessage = async (content: string) => {
@@ -30,6 +38,7 @@ export const ChatInput = () => {
     try {
       addMessage(userMessage);
       setLoading(true);
+      setCurrentStreamingMessage('');
 
       const messageList = settings.systemPrompt
         ? [
@@ -39,7 +48,16 @@ export const ChatInput = () => {
           ]
         : [...messages, userMessage];
 
-      const response = await chatCompletion(messageList, settings, apiKey);
+      let streamContent = '';
+      const response = await chatCompletion(
+        messageList, 
+        settings, 
+        apiKey,
+        (content: string) => {
+          streamContent += content;
+          setCurrentStreamingMessage(streamContent);
+        }
+      );
 
       addMessage({
         role: 'assistant',
@@ -55,6 +73,7 @@ export const ChatInput = () => {
       console.error(error);
     } finally {
       setLoading(false);
+      setCurrentStreamingMessage(null);
     }
   };
 

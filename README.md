@@ -13,6 +13,14 @@ DeepSeek WebUI 是一个基于 DeepSeek 大语言模型的现代化 Web 交互�
 - 支持自定义请求头
 - 支持参数验证和必填项设置
 
+#### 函数调用示例
+*函数配置示例*
+![函数功能示例](docs/images/funcCall1.png)
+*天气查询函数配置示例*
+![函数功能示例](docs/images/funcCall3.png)
+*天气查询函数测试调用示例*
+![函数功能示例](docs/images/funcCall2.png)
+
 ### 对话功能
 - 支持多轮对话
 - 支持代码高亮显示
@@ -20,6 +28,9 @@ DeepSeek WebUI 是一个基于 DeepSeek 大语言模型的现代化 Web 交互�
 - 支持数学公式渲染
 - 支持多会话管理
 - 支持对话历史导出/导入
+
+*对话功能示例*
+![函数调用示例](docs/images/function-call-example.png)
 
 ### 模型控制
 - 支持温度（temperature）调节

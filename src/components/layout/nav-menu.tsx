@@ -9,12 +9,13 @@ import {
   BookOutlined,
   FunctionOutlined,
 } from '@ant-design/icons';
+import styles from '@/styles/layout/nav-menu.module.css';
 
 const menuItems = [
   {
-    key: '/',
+    key: '/chat',
     icon: <MessageOutlined />,
-    label: <Link href="/">对话</Link>,
+    label: <Link href="/chat">对话</Link>,
   },
   {
     key: '/templates',
@@ -36,7 +37,7 @@ const menuItems = [
 export function NavMenu() {
   const pathname = usePathname();
   const selectedKey = menuItems.find(item => 
-    pathname.startsWith(item.key === '/' ? item.key : item.key + '/')
+    pathname.startsWith(item.key)
   )?.key || pathname;
 
   return (
@@ -44,7 +45,7 @@ export function NavMenu() {
       mode="inline"
       selectedKeys={[selectedKey]}
       items={menuItems}
-      className="border-0"
+      className={styles.menu}
     />
   );
 } 

@@ -8,10 +8,12 @@ export default function ChatPage() {
   return (
     <div className={styles.pageContainer}>
       <div className={styles.pageContent}>
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 bg-gray-50">
           <ChatWindow />
         </div>
-        <ChatInput />
+        <div className="border-t bg-white">
+          <ChatInput />
+        </div>
       </div>
     </div>
   );
