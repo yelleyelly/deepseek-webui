@@ -116,15 +116,10 @@ npm run build
 2. 可以在函数配置页面添加或修改可调用的外部函数
 3. 在对话页面可以直接与 AI 进行对话，AI 会根据需要调用配置的函数
 
-## 技术栈
+## 作者
 
-- Next.js 14 (App Router)
-- TypeScript
-- Tailwind CSS
-- Zustand (状态管理)
-- Ant Design (UI 组件)
-- localStorage (本地数据存储)
-
+- 作者：[LazyBoyJgn99](https://github.com/LazyBoyJgn99)
+- `vx：jgn0206`
 
 ## ⭐️Star 经历
 
@@ -132,3 +127,4 @@ npm run build
 
 看到这里，请你点个免费的小小的star，谢谢！
 [![Star History Chart](https://api.star-history.com/svg?repos=LazyBoyJgn99/deepseek-webui&type=Date)](https://star-history.com/#LazyBoyJgn99/deepseek-webui&Date)
+
