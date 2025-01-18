@@ -1,0 +1,126 @@
+{
+  "rules": {
+    "typescript": {
+      "indent": {
+        "size": 2,
+        "style": "space"
+      },
+      "quotes": {
+        "style": "single"
+      },
+      "semicolons": true,
+      "trailingComma": "es5",
+      "bracketSpacing": true,
+      "arrowParens": "always",
+      "maxLineLength": 100,
+      "endOfLine": "lf"
+    },
+    "javascript": {
+      "extends": "typescript"
+    },
+    "css": {
+      "indent": {
+        "size": 2,
+        "style": "space"
+      }
+    },
+    "markdown": {
+      "maxLineLength": 100
+    },
+    "naming": {
+      "components": "PascalCase",
+      "functions": "camelCase",
+      "variables": "camelCase",
+      "constants": "UPPER_CASE",
+      "interfaces": "PascalCase",
+      "types": "PascalCase",
+      "enums": "PascalCase"
+    },
+    "imports": {
+      "order": [
+        "^react",
+        "^next",
+        "^@/components/(.*)$",
+        "^@/lib/(.*)$",
+        "^@/styles/(.*)$",
+        "^[./]"
+      ],
+      "newlines": true
+    },
+    "folders": {
+      "components": {
+        "structure": "feature-based",
+        "naming": "kebab-case"
+      },
+      "pages": {
+        "structure": "route-based",
+        "naming": "kebab-case"
+      }
+    },
+    "comments": {
+      "requireFunctionComments": true,
+      "requireClassComments": true,
+      "requireInterfaceComments": true
+    },
+    "typescript-specific": {
+      "strictNullChecks": true,
+      "noImplicitAny": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true
+    }
+  },
+  "ignore": [
+    "node_modules",
+    ".next",
+    "build",
+    "dist",
+    "*.config.js",
+    "*.config.ts"
+  ],
+  "customPatterns": {
+    "component-structure": {
+      "pattern": "^[A-Z][a-zA-Z0-9]*$",
+      "message": "组件名称必须使用 PascalCase"
+    },
+    "api-route-structure": {
+      "pattern": "^[a-z][a-zA-Z0-9-]*$",
+      "message": "API 路由必须使用 kebab-case"
+    }
+  },
+  "fileTemplates": {
+    "component": {
+      "path": "components/{name}/{name}.tsx",
+      "template": [
+        "import React from 'react';",
+        "",
+        "interface {name}Props {",
+        "  // 在此定义组件属性",
+        "}",
+        "",
+        "export const {name}: React.FC<{name}Props> = ({}) => {",
+        "  return (",
+        "    <div>",
+        "      {/* 组件内容 */}",
+        "    </div>",
+        "  );",
+        "};",
+        ""
+      ]
+    },
+    "page": {
+      "path": "app/{name}/page.tsx",
+      "template": [
+        "import React from 'react';",
+        "",
+        "export default function {name}Page() {",
+        "  return (",
+        "    <div>",
+        "      {/* 页面内容 */}",
+        "    </div>",
+        "  );",
+        "}",
+        ""
+      ]
+    }
+  }
+} 

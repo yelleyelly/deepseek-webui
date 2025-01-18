@@ -1,0 +1,32 @@
+.container {
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem;
+}
+
+.toolbar {
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toolbarActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.inputWrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.textarea {
+  flex: 1;
+  resize: none;
+}
+
+.sendButton {
+  min-width: 80px;
+  height: 40px;
+} 
