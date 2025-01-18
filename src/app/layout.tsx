@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   description: "基于 DeepSeek 大语言模型的现代化 Web 交互界面",
 };
 
+export const revalidate = 3600; // 1小时重新验证一次
+
 export default function RootLayout({
   children,
 }: {

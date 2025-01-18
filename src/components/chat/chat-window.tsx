@@ -3,7 +3,7 @@
 import { Message } from '@/types';
 import { useChatStore } from '@/lib/store/chat-store';
 import { formatDate } from '@/lib/utils';
-import { Card, Avatar, Spin } from 'antd';
+import { Card, Avatar, Spin, Image } from 'antd';
 import { UserOutlined, RobotOutlined } from '@ant-design/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageContent } from './message-content';
@@ -27,13 +27,14 @@ export const ChatWindow = () => {
   return (
     <div className={styles.container}>
       <div className={styles.messageList}>
-        <AnimatePresence>
+        <AnimatePresence mode="popLayout">
           {messages.map((message: Message) => (
             <motion.div
               key={message.timestamp}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
+              layout
               className={`${styles.messageWrapper} ${
                 message.role === 'assistant'
                   ? styles.messageWrapperAssistant

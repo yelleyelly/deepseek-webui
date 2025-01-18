@@ -1,18 +1,41 @@
 'use client';
 
+import React, { Suspense, useState, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { Button, message, Spin } from 'antd';
+import { CopyOutlined, CheckOutlined } from '@ant-design/icons';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { CopyOutlined, CheckOutlined } from '@ant-design/icons';
-import { Button, message } from 'antd';
-import { useState } from 'react';
-import { Components } from 'react-markdown';
+
+const CodeBlock = memo(({ language, code, onCopy, isCopied }: {
+  language: string;
+  code: string;
+  onCopy: (code: string) => void;
+  isCopied: boolean;
+}) => (
+  <div className="relative group">
+    <Button
+      type="text"
+      size="small"
+      className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
+      icon={isCopied ? <CheckOutlined /> : <CopyOutlined />}
+      onClick={() => onCopy(code)}
+    />
+    <SyntaxHighlighter
+      language={language}
+      style={vscDarkPlus}
+      PreTag="div"
+    >
+      {code}
+    </SyntaxHighlighter>
+  </div>
+));
 
 interface MessageContentProps {
   content: string;
 }
 
-export function MessageContent({ content }: MessageContentProps) {
+export const MessageContent = memo(({ content }: MessageContentProps) => {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const handleCopyCode = async (code: string) => {
@@ -27,38 +50,29 @@ export function MessageContent({ content }: MessageContentProps) {
   };
 
   return (
-    <ReactMarkdown
-      components={{
-        code: ({ inline, className, children, ...props }: any) => {
-          const match = /language-(\w+)/.exec(className || '');
-          const code = String(children).replace(/\n$/, '');
+    <Suspense fallback={<Spin />}>
+      <ReactMarkdown
+        components={{
+          code: ({ inline, className, children, ...props }: any) => {
+            const match = /language-(\w+)/.exec(className || '');
+            const code = String(children).replace(/\n$/, '');
 
-          if (!inline && match) {
-            return (
-              <div className="relative group">
-                <Button
-                  type="text"
-                  size="small"
-                  className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  icon={copiedCode === code ? <CheckOutlined /> : <CopyOutlined />}
-                  onClick={() => handleCopyCode(code)}
-                />
-                <SyntaxHighlighter
+            if (!inline && match) {
+              return (
+                <CodeBlock
                   language={match[1]}
-                  style={vscDarkPlus}
-                  PreTag="div"
-                  {...props}
-                >
-                  {code}
-                </SyntaxHighlighter>
-              </div>
-            );
-          }
-          return <code className={className} {...props}>{children}</code>;
-        },
-      }}
-    >
-      {content}
-    </ReactMarkdown>
+                  code={code}
+                  onCopy={handleCopyCode}
+                  isCopied={copiedCode === code}
+                />
+              );
+            }
+            return <code className={className} {...props}>{children}</code>;
+          },
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </Suspense>
   );
-} 
+}); 
