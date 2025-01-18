@@ -111,3 +111,11 @@ npm run build
 - Zustand (状态管理)
 - Ant Design (UI 组件)
 - localStorage (本地数据存储)
+
+
+## ⭐️Star 经历
+
+## Star History
+
+看到这里，请你点个免费的小小的star，谢谢！
+[![Star History Chart](https://api.star-history.com/svg?repos=LazyBoyJgn99/deepseek-webui&type=Date)](https://star-history.com/#LazyBoyJgn99/deepseek-webui&Date)
