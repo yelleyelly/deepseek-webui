@@ -2,6 +2,10 @@
 
 DeepSeek WebUI 是一个基于 DeepSeek 大语言模型的现代化 Web 交互界面。
 
+[支持国产，从我做起，在线体验link](https://deepseek-webui.vercel.app/)
+
+本项目完全开源，欢迎共建
+
 ## 主要功能
 
 ### 函数调用功能
