@@ -3,6 +3,7 @@
 import { Layout } from 'antd';
 import { NavMenu } from './nav-menu';
 import { PageBreadcrumb } from './breadcrumb';
+import { BalanceDisplay } from './balance-display';
 
 const { Sider, Content } = Layout;
 
@@ -24,6 +25,7 @@ export default function MainLayout({
           </div>
           <div className="flex-1 overflow-y-auto">
             <NavMenu />
+            <BalanceDisplay />
           </div>
         </div>
       </Sider>

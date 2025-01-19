@@ -267,4 +267,35 @@ export async function chatCompletion(
     console.error('API 调用错误:', error);
     throw error;
   }
+}
+
+export interface BalanceInfo {
+  currency: 'CNY' | 'USD';
+  total_balance: string;
+  granted_balance: string;
+  topped_up_balance: string;
+}
+
+export interface BalanceResponse {
+  is_available: boolean;
+  balance_infos: BalanceInfo[];
+}
+
+export async function getBalance(apiKey: string): Promise<BalanceResponse> {
+  if (!apiKey) {
+    throw new Error('请先设置 API Key');
+  }
+
+  const response = await fetch(`${API_CONFIG.BASE_URL}/user/balance`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('获取余额失败');
+  }
+
+  return response.json();
 } 
