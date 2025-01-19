@@ -1,22 +1,28 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Form, Input, Select, Button, Space } from 'antd';
 import { Template, CreateTemplateInput } from '@/types/template';
 
 interface TemplateFormProps {
-  initialValues?: Partial<Template>;
+  data?: Partial<Template>;
   onSubmit: (values: CreateTemplateInput) => void;
   onCancel: () => void;
 }
 
-export function TemplateForm({ initialValues, onSubmit, onCancel }: TemplateFormProps) {
+export function TemplateForm({ data, onSubmit, onCancel }: TemplateFormProps) {
   const [form] = Form.useForm<CreateTemplateInput>();
+
+  useEffect(() => {
+    if (data) {
+      form.setFieldsValue(data);
+    }
+  }, [data]);
 
   return (
     <Form
       form={form}
       layout="vertical"
-      initialValues={initialValues}
       onFinish={onSubmit}
     >
       <Form.Item

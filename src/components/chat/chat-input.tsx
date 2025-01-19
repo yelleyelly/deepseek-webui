@@ -21,7 +21,7 @@ export const ChatInput = () => {
     setCurrentStreamingMessage,
     appendToLastMessage
   } = useChatStore();
-  const { settings, apiKey } = useSettingsStore();
+  const { settings, apiKey, updateSettings } = useSettingsStore();
 
   const sendMessage = async (content: string) => {
     if (!apiKey) {
@@ -134,7 +134,9 @@ export const ChatInput = () => {
 
   const handleTemplateSelect = async (prompt: string) => {
     if (isLoading) return;
-    await sendMessage(prompt);
+    updateSettings({ systemPrompt: prompt });
+    clearMessages();
+    message.success('已应用模板，对话已重置');
   };
 
   return (

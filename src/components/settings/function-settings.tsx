@@ -109,51 +109,57 @@ export function FunctionSettings() {
           <List.Item>
             <Card
               title={
-                <Space>
+                <div>
                   <ApiOutlined />
                   {func.name}
                   <Tag color="blue">{func.method}</Tag>
-                </Space>
+                  <div className="flex-1">
+                    <Button
+                      key="edit"
+                      icon={<EditOutlined />}
+                      onClick={() => {
+                        setEditingFunction(func);
+                        form.setFieldsValue({
+                          ...func,
+                          parameters: {
+                            ...func.parameters,
+                            properties: JSON.stringify(func.parameters.properties, null, 2),
+                          },
+                          headers: func.headers ? JSON.stringify(func.headers, null, 2) : undefined,
+                        });
+                        setIsModalOpen(true);
+                      }}
+                    />
+                    <Button
+                      key="delete"
+                      icon={<DeleteOutlined />}
+                      danger
+                      onClick={() => handleDelete(func.id)}
+                    />
+                    <Button
+                      key="test"
+                      icon={<ThunderboltOutlined />}
+                      onClick={() => setTestingFunction(func)}
+                    >
+                      测试
+                    </Button>
+                  </div>
+                </div>
               }
               extra={[
-                <Button
-                  key="edit"
-                  icon={<EditOutlined />}
-                  onClick={() => {
-                    setEditingFunction(func);
-                    form.setFieldsValue({
-                      ...func,
-                      parameters: {
-                        ...func.parameters,
-                        properties: JSON.stringify(func.parameters.properties, null, 2),
-                      },
-                      headers: func.headers ? JSON.stringify(func.headers, null, 2) : undefined,
-                    });
-                    setIsModalOpen(true);
-                  }}
-                />,
-                <Button
-                  key="delete"
-                  icon={<DeleteOutlined />}
-                  danger
-                  onClick={() => handleDelete(func.id)}
-                />,
-                <Button
-                  key="test"
-                  icon={<ThunderboltOutlined />}
-                  onClick={() => setTestingFunction(func)}
-                >
-                  测试
-                </Button>,
+                
               ]}
             >
               <p className="text-gray-500">{func.description}</p>
-              <p className="mt-2">
-                <strong>URL:</strong> {func.url}
-              </p>
+              <div className="mt-2">
+                <strong>URL:</strong>
+                <div className="mt-1 break-all text-gray-600 text-sm">
+                  {func.url}
+                </div>
+              </div>
               <div className="mt-2">
                 <strong>参数:</strong>
-                <div className="mt-1">
+                <div className="mt-1 flex flex-wrap gap-1">
                   {Object.entries(func.parameters.properties).map(([key, value]) => (
                     <Tag key={key} className="mb-1">
                       {key}
@@ -165,7 +171,7 @@ export function FunctionSettings() {
               {func.headers && (
                 <div className="mt-2">
                   <strong>请求头:</strong>
-                  <div className="mt-1">
+                  <div className="mt-1 flex flex-wrap gap-1">
                     {Object.keys(func.headers).map(key => (
                       <Tag key={key} color="green">{key}</Tag>
                     ))}

@@ -115,7 +115,8 @@ export default function TemplatesPage() {
             width={720}
           >
             <TemplateForm
-              initialValues={editingTemplate || undefined}
+              data={editingTemplate || undefined}
+
               onSubmit={handleSubmit}
               onCancel={() => {
                 setIsModalOpen(false);
