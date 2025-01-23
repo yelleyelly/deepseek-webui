@@ -39,6 +39,7 @@ export function SettingsPanel() {
           <Select>
             <Select.Option value="chat">DeepSeek Chat</Select.Option>
             <Select.Option value="coder">DeepSeek Coder</Select.Option>
+            <Select.Option value="reasoner">DeepSeek Reasoner</Select.Option>
           </Select>
         </Form.Item>
 

@@ -3,6 +3,7 @@ export const API_CONFIG = {
   MODELS: {
     'chat': 'deepseek-chat',
     'coder': 'deepseek-coder',
+    'reasoner': 'deepseek-reasoner',
   },
 } as const;
 

@@ -1,31 +1,47 @@
 import { Message, Settings } from '@/types';
 import { API_CONFIG } from './config';
 import { executeFunctionCall } from './function-handler';
+import OpenAI from 'openai';
+import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
-interface ToolCall {
-  id: string;
-  function: {
-    name: string;
-    arguments: string;
-  };
+// 验证消息序列是否合法
+function validateMessages(messages: ChatCompletionMessageParam[], model: string) {
+  if (model === 'deepseek-reasoner') {
+    for (let i = 1; i < messages.length; i++) {
+      if (messages[i].role === messages[i - 1].role) {
+        throw new Error('使用 deepseek-reasoner 模型时，消息序列中的用户和助手消息必须交替出现');
+      }
+    }
+  }
 }
 
 export async function chatCompletion(
-  messages: Message[],
+  messages: ChatCompletionMessageParam[],
   settings: Settings,
   apiKey: string,
   onStream?: (content: string) => void,
 ) {
+  const openai = new OpenAI({
+    baseURL: API_CONFIG.BASE_URL,
+    apiKey: apiKey,
+    dangerouslyAllowBrowser: true
+  });
+
   try {
-    // 转换函数定义为 DeepSeek 格式
-    const tools = settings.functions?.map(func => ({
-      type: 'function',
+    const modelName = API_CONFIG.MODELS[settings.model as keyof typeof API_CONFIG.MODELS];
+    // 验证消息序列
+    validateMessages(messages, modelName);
+
+    // 只在非 deepseek-reasoner 模型时启用函数调用
+    const tools = modelName !== 'deepseek-reasoner' ? settings.functions?.map(func => ({
+      type: 'function' as const,
       function: {
         name: func.name,
         description: func.description,
         parameters: func.parameters,
       },
-    }));
+    })) : undefined;
+
     if (!apiKey || apiKey.length < 30) {
       throw new Error('请先在设置页面配置您的 DeepSeek API Key');
     }
@@ -44,30 +60,20 @@ export async function chatCompletion(
         ...(tools && tools.length > 0 ? { tools } : {}),
         stream: true,
       }),
-    }).catch(error => {
-      const errorMessage = error.message.toLowerCase();
-      if (errorMessage.includes('authentication') || 
-          errorMessage.includes('apikey') || 
-          errorMessage.includes('api key') || 
-          errorMessage.includes('access token') ||
-          errorMessage.includes('unauthorized')) {
-        throw new Error('API Key 无效，请检查您的 API Key 设置');
-      }
-      throw error;
     });
 
     if (!response.ok) {
       const errorBody = await response.text().catch(() => null);
       const errorMessage = errorBody?.toLowerCase() || response.statusText.toLowerCase();
-      
-      if (errorMessage.includes('authentication') || 
-          errorMessage.includes('apikey') || 
-          errorMessage.includes('api key') || 
-          errorMessage.includes('access token') ||
-          errorMessage.includes('unauthorized')) {
+
+      if (errorMessage.includes('authentication') ||
+        errorMessage.includes('apikey') ||
+        errorMessage.includes('api key') ||
+        errorMessage.includes('access token') ||
+        errorMessage.includes('unauthorized')) {
         throw new Error('API Key 无效，请检查您的 API Key 设置');
       }
-      
+
       throw new Error(
         `API 请求失败 (${response.status}): ${response.statusText}\n${errorBody ? `详细信息: ${errorBody}` : ''}`
       );
@@ -94,48 +100,31 @@ export async function chatCompletion(
         const { done, value } = await reader.read();
         if (done) break;
 
-        // 解码新的数据块并添加到缓冲区
         const chunk = decoder.decode(value, { stream: true });
-        console.log('收到原始数据块:', chunk);
         buffer += chunk;
 
-        // 处理完整的 SSE 消息
         const lines = buffer.split('\n');
-        buffer = lines.pop() || ''; // 保留最后一个不完整的行
+        buffer = lines.pop() || '';
 
         for (const line of lines) {
-          // 跳过空行和注释
           if (!line.trim() || line.startsWith(':')) continue;
 
-          console.log('处理单行数据:', line);
-
-          // 处理 SSE 消息
           if (line.startsWith('data: ')) {
-            const data = line.slice(6).trim(); // 移除 "data: " 前缀并清理空白
-            console.log('尝试解析的 JSON 数据:', data);
-            
-            if (data === '[DONE]') {
-              console.log('收到结束标记');
-              continue;
-            }
+            const data = line.slice(6).trim();
+            if (data === '[DONE]') continue;
 
             try {
               const parsed = JSON.parse(data);
-              console.log('解析后的数据:', parsed);
-              
-              // 处理普通的文本内容
+
               if (parsed.choices?.[0]?.delta?.content) {
                 const content = parsed.choices[0].delta.content;
-                console.log('提取的内容:', content);
                 fullContent += content;
                 onStream?.(content);
               }
 
-              // 处理函数调用的增量更新
               if (parsed.choices?.[0]?.delta?.tool_calls?.[0]) {
                 const toolCallDelta = parsed.choices[0].delta.tool_calls[0];
-                
-                // 更新当前的工具调用
+
                 if (toolCallDelta.id) {
                   currentToolCall.id = toolCallDelta.id;
                 }
@@ -145,15 +134,13 @@ export async function chatCompletion(
                 }
                 if (toolCallDelta.function?.arguments) {
                   if (!currentToolCall.function) currentToolCall.function = {};
-                  currentToolCall.function.arguments = (currentToolCall.function.arguments || '') + 
+                  currentToolCall.function.arguments = (currentToolCall.function.arguments || '') +
                     toolCallDelta.function.arguments;
                 }
 
-                // 如果收到了完整的函数调用
-                if (currentToolCall.id && 
-                    currentToolCall.function?.name && 
-                    typeof currentToolCall.function.arguments === 'string') {
-                  console.log('完整的函数调用:', currentToolCall);
+                if (currentToolCall.id &&
+                  currentToolCall.function?.name &&
+                  typeof currentToolCall.function.arguments === 'string') {
 
                   const functionDef = settings.functions?.find(
                     f => f.name === currentToolCall.function?.name
@@ -166,8 +153,7 @@ export async function chatCompletion(
                   try {
                     const functionArgs = JSON.parse(currentToolCall.function.arguments);
                     const result = await executeFunctionCall(functionDef, functionArgs);
-                    
-                    // 发送第二次请求
+
                     const secondResponse = await fetch(`${API_CONFIG.BASE_URL}/chat/completions`, {
                       method: 'POST',
                       headers: {
@@ -179,7 +165,7 @@ export async function chatCompletion(
                         model: API_CONFIG.MODELS[settings.model as keyof typeof API_CONFIG.MODELS],
                         messages: [
                           ...messages,
-                          { 
+                          {
                             role: 'assistant',
                             content: fullContent,
                             tool_calls: [{
@@ -206,10 +192,8 @@ export async function chatCompletion(
                       throw new Error(`API 请求失败: ${secondResponse.statusText}`);
                     }
 
-                    // 重置当前工具调用
                     currentToolCall = {};
 
-                    // 处理第二次响应
                     const secondReader = secondResponse.body?.getReader();
                     if (secondReader) {
                       let secondBuffer = '';
@@ -218,7 +202,6 @@ export async function chatCompletion(
                         if (done) break;
 
                         const secondChunk = decoder.decode(value, { stream: true });
-                        console.log('第二次响应原始数据块:', secondChunk);
                         secondBuffer += secondChunk;
 
                         const secondLines = secondBuffer.split('\n');
@@ -253,7 +236,6 @@ export async function chatCompletion(
               }
             } catch (e) {
               console.error('解析响应数据失败:', e);
-              console.error('导致错误的数据:', data);
             }
           }
         }
@@ -268,6 +250,8 @@ export async function chatCompletion(
     throw error;
   }
 }
+
+
 
 export interface BalanceInfo {
   currency: 'CNY' | 'USD';
