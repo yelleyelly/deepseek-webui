@@ -9,6 +9,7 @@ import { chatCompletion } from '@/lib/api/deepseek';
 import { useChatShortcuts } from '@/hooks/use-chat-shortcuts';
 import styles from '@/styles/chat/chat-input.module.css';
 import { TemplateSelector } from './template-selector';
+import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 export const ChatInput = () => {
   const [input, setInput] = useState('');
@@ -19,7 +20,6 @@ export const ChatInput = () => {
     setLoading, 
     clearMessages,
     setCurrentStreamingMessage,
-    appendToLastMessage
   } = useChatStore();
   const { settings, apiKey, updateSettings } = useSettingsStore();
 
@@ -50,7 +50,7 @@ export const ChatInput = () => {
 
       let streamContent = '';
       const response = await chatCompletion(
-        messageList, 
+        messageList as ChatCompletionMessageParam[], 
         settings, 
         apiKey,
         (content: string) => {
