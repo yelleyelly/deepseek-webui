@@ -282,4 +282,176 @@ export async function getBalance(apiKey: string): Promise<BalanceResponse> {
   }
 
   return response.json();
+}
+
+interface UploadFileResponse {
+  code: number;
+  msg: string;
+  data: {
+    biz_code: number;
+    biz_msg: string;
+    biz_data: {
+      id: string;
+      status: string;
+      file_name: string;
+      file_size: number;
+      token_usage: number;
+      error_code: null | string;
+      inserted_at: number;
+      updated_at: number;
+    };
+  };
+}
+
+interface CreateSessionResponse {
+  code: number;
+  msg: string;
+  data: {
+    biz_code: number;
+    biz_msg: string;
+    biz_data: {
+      id: string;
+      seq_id: number;
+      agent: string;
+      character: null | string;
+      title: null | string;
+      title_type: null | string;
+      version: number;
+      current_message_id: null | string;
+      inserted_at: number;
+      updated_at: number;
+    };
+  };
+}
+
+interface CompletionOptions {
+  chat_session_id: string;
+  parent_message_id: string | null;
+  prompt: string;
+  ref_file_ids: string[];
+  search_enabled?: boolean;
+  thinking_enabled?: boolean;
+  onStream?: (content: string) => void;
+  apiKey: string;
+}
+
+
+export class DeepSeekApiError extends Error {
+  constructor(message: string, public code?: number) {
+    super(message);
+    this.name = 'DeepSeekApiError';
+  }
+}
+
+/**
+ * 上传文件到 DeepSeek
+ * @param file 要上传的文件
+ * @returns 上传成功后的文件信息
+ */
+export async function openUploadFile(file: File, apiKey: string): Promise<UploadFileResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_CONFIG.BASE_URL}/upload`, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+    },
+  });
+
+
+
+  if (!response.ok) {
+    throw new DeepSeekApiError(`文件上传失败: ${response.statusText}`, response.status);
+  }
+
+  const result = await response.json();
+  if (result.code !== 0) {
+    throw new DeepSeekApiError(result.msg || '文件上传失败', result.code);
+  }
+
+  return result;
+}
+
+/**
+ * 创建新的聊天会话
+ * @param character_id 可选的角色ID
+ * @returns 创建的会话信息
+ */
+export async function openCreateSession(character_id: string | null = null, apiKey: string): Promise<CreateSessionResponse> {
+  const response = await fetch(`${API_CONFIG.BASE_URL_V0}/chat_session/create`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({ character_id }),
+  });
+
+  if (!response.ok) {
+    throw new DeepSeekApiError(`创建会话失败: ${response.statusText}`, response.status);
+  }
+
+  const result = await response.json();
+  if (result.code !== 0) {
+    throw new DeepSeekApiError(result.msg || '创建会话失败', result.code);
+  }
+
+  return result;
+}
+
+/**
+ * 发送消息并获取流式响应
+ * @param options 消息选项
+ */
+export async function openChatCompletion({
+  chat_session_id,
+  parent_message_id,
+  prompt,
+  ref_file_ids,
+  search_enabled = false,
+  thinking_enabled = false,
+  onStream,
+  apiKey,
+
+}: CompletionOptions): Promise<void> {
+  const response = await fetch(`${API_CONFIG.BASE_URL_V0}/chat/completion`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      chat_session_id,
+      parent_message_id,
+      prompt,
+      ref_file_ids,
+      search_enabled,
+      thinking_enabled,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new DeepSeekApiError(`发送消息失败: ${response.statusText}`, response.status);
+  }
+
+  if (!response.body) {
+    throw new DeepSeekApiError('响应体为空');
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      onStream?.(chunk);
+    }
+  } finally {
+    reader.releaseLock();
+  }
 } 

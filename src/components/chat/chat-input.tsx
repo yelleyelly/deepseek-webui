@@ -1,18 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { Input, Button, message, Tooltip, Modal } from 'antd';
-import { SendOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
+import { Input, Button, message, Tooltip, Modal, Upload } from 'antd';
+import { SendOutlined, DeleteOutlined, DownloadOutlined, PaperClipOutlined } from '@ant-design/icons';
 import { useChatStore } from '@/lib/store/chat-store';
 import { useSettingsStore } from '@/lib/store/settings-store';
 import { chatCompletion } from '@/lib/api/deepseek';
+import { openUploadFile } from '@/lib/api/deepseekopenapi';
 import { useChatShortcuts } from '@/hooks/use-chat-shortcuts';
 import styles from '@/styles/chat/chat-input.module.css';
 import { TemplateSelector } from './template-selector';
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import type { UploadFile } from 'antd/es/upload/interface';
 
 export const ChatInput = () => {
   const [input, setInput] = useState('');
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
   const { 
     addMessage, 
     messages, 
@@ -22,6 +26,43 @@ export const ChatInput = () => {
     setCurrentStreamingMessage,
   } = useChatStore();
   const { settings, apiKey, updateSettings } = useSettingsStore();
+
+  const handleFileUpload = async (file: File) => {
+    if (!apiKey) {
+      message.error('请先设置 API Key');
+      return Upload.LIST_IGNORE;
+    }
+
+    const isLt10M = file.size / 1024 / 1024 < 10;
+    if (!isLt10M) {
+      message.error('文件必须小于10MB！');
+      return Upload.LIST_IGNORE;
+    }
+
+    try {
+      const result = await openUploadFile(file, apiKey);
+      if (result.code === 0) {
+        setUploadedFileIds(prev => [...prev, result.data.biz_data.id]);
+        message.success(`文件 "${file.name}" 上传成功`);
+        return true;
+      } else {
+        message.error(result.msg || '文件上传失败');
+        return Upload.LIST_IGNORE;
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message);
+      } else {
+        message.error('文件上传失败');
+      }
+      return Upload.LIST_IGNORE;
+    }
+  };
+
+  const handleFileRemove = (file: UploadFile) => {
+    setFileList(prev => prev.filter(f => f.uid !== file.uid));
+    // 这里可以添加从服务器删除文件的逻辑，如果需要的话
+  };
 
   const sendMessage = async (content: string) => {
     if (!apiKey) {
@@ -64,6 +105,10 @@ export const ChatInput = () => {
         content: response,
         timestamp: Date.now(),
       });
+
+      // 清空文件列表和ID
+      setFileList([]);
+      setUploadedFileIds([]);
     } catch (error) {
       if (error instanceof Error) {
         message.error(error.message);
@@ -147,6 +192,20 @@ export const ChatInput = () => {
           disabled={isLoading} 
         />
         <div className={styles.toolbarActions}>
+          <Upload
+            multiple
+            showUploadList={false}
+            beforeUpload={handleFileUpload}
+            onChange={({ fileList }) => setFileList(fileList)}
+            fileList={fileList}
+          >
+            <Tooltip title="上传文件">
+              <Button
+                icon={<PaperClipOutlined />}
+                disabled={isLoading}
+              />
+            </Tooltip>
+          </Upload>
           <Tooltip title="导出对话">
             <Button
               icon={<DownloadOutlined />}
@@ -168,7 +227,7 @@ export const ChatInput = () => {
           <Input.TextArea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="输入消息... (Ctrl + Enter 发送)"
+            placeholder={fileList.length > 0 ? "请输入关于文件的问题..." : "输入消息... (Ctrl + Enter 发送)"}
             autoSize={{ minRows: 1, maxRows: 4 }}
             className={styles.textarea}
           />
@@ -184,6 +243,23 @@ export const ChatInput = () => {
             </Button>
           </Tooltip>
         </div>
+        {fileList.length > 0 && (
+          <div className={styles.fileList}>
+            {fileList.map(file => (
+              <div key={file.uid} className={styles.fileItem}>
+                <PaperClipOutlined /> {file.name}
+                <Button
+                  type="text"
+                  size="small"
+                  danger
+                  onClick={() => handleFileRemove(file)}
+                >
+                  移除
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </form>
     </div>
   );
