@@ -1,6 +1,7 @@
 import { Message, Settings } from '@/types';
 import { API_CONFIG } from './config';
 import { executeFunctionCall } from './function-handler';
+import { processRequestBody } from '@/lib/utils/function-utils';
 // import OpenAI from 'openai';
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
@@ -152,7 +153,9 @@ export async function chatCompletion(
 
                   try {
                     const functionArgs = JSON.parse(currentToolCall.function.arguments);
-                    const result = await executeFunctionCall(functionDef, functionArgs);
+                    // 处理函数参数，保持对象结构
+                    const processedArgs = processRequestBody(functionArgs, functionDef.parameters);
+                    const result = await executeFunctionCall(functionDef, processedArgs);
 
                     const secondResponse = await fetch(`${API_CONFIG.BASE_URL}/chat/completions`, {
                       method: 'POST',
@@ -173,14 +176,14 @@ export async function chatCompletion(
                               type: 'function',
                               function: {
                                 name: currentToolCall.function!.name!,
-                                arguments: currentToolCall.function!.arguments!
+                                arguments: JSON.stringify(processedArgs, null, 2)
                               }
                             }]
                           },
                           {
                             role: 'tool',
                             tool_call_id: currentToolCall.id,
-                            content: JSON.stringify(result),
+                            content: JSON.stringify(result, null, 2),
                           },
                         ],
                         temperature: settings.temperature,

@@ -1,106 +1,187 @@
 'use client';
 
 import { useState } from 'react';
-import { Modal, Form, Input, Select, Button, Alert, Typography } from 'antd';
+import { Modal, Form, Input, Button, Space, Typography, Spin } from 'antd';
 import { FunctionDefinition } from '@/types';
 import { testFunction, TestResult } from '@/lib/api/function-tester';
+import { JsonView, defaultStyles } from 'react-json-view-lite';
+import 'react-json-view-lite/dist/index.css';
 
 const { Text } = Typography;
 
-interface FunctionTestModalProps {
+interface Props {
   open: boolean;
   func: FunctionDefinition;
   onClose: () => void;
 }
 
-export function FunctionTestModal({ open, func, onClose }: FunctionTestModalProps) {
-  const [form] = Form.useForm();
+interface FormData {
+  [key: string]: any;
+}
+
+function renderNestedFormItems(
+  paramName: string,
+  paramDef: any,
+  required: boolean = false,
+  parentPath: string[] = []
+) {
+  const currentPath = [...parentPath, paramName];
+  const fieldPath = currentPath.join('.');
+  const isRequired = required || (paramDef.required || []).includes(paramName);
+
+  if (paramDef.type === 'object' && paramDef.properties) {
+    return (
+      <div key={fieldPath} style={{ marginBottom: '1rem' }}>
+        <Text strong>{paramName}</Text>
+        <div style={{ marginLeft: '1.5rem' }}>
+          {Object.entries(paramDef.properties).map(([key, prop]: [string, any]) => (
+            renderNestedFormItems(key, prop, isRequired, currentPath)
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const rules = [];
+  if (isRequired) {
+    rules.push({ required: true, message: `请输入 ${fieldPath}` });
+  }
+
+  switch (paramDef.type) {
+    case 'number':
+      return (
+        <Form.Item
+          key={fieldPath}
+          name={fieldPath}
+          label={paramName}
+          rules={[
+            ...rules,
+            { pattern: /^-?\d*\.?\d*$/, message: `${fieldPath} 必须是数字` }
+          ]}
+          tooltip={paramDef.description}
+        >
+          <Input type="number" placeholder={`请输入${paramDef.description || paramName}`} />
+        </Form.Item>
+      );
+    case 'boolean':
+      return (
+        <Form.Item
+          key={fieldPath}
+          name={fieldPath}
+          label={paramName}
+          rules={rules}
+          tooltip={paramDef.description}
+          valuePropName="checked"
+        >
+          <Input type="checkbox" />
+        </Form.Item>
+      );
+    default:
+      return (
+        <Form.Item
+          key={fieldPath}
+          name={fieldPath}
+          label={paramName}
+          rules={rules}
+          tooltip={paramDef.description}
+        >
+          <Input placeholder={`请输入${paramDef.description || paramName}`} />
+        </Form.Item>
+      );
+  }
+}
+
+function processFormValues(values: Record<string, any>): Record<string, any> {
+  const result: Record<string, any> = {};
+  
+  for (const [key, value] of Object.entries(values)) {
+    if (key.includes('.')) {
+      const parts = key.split('.');
+      let current = result;
+      for (let i = 0; i < parts.length - 1; i++) {
+        current[parts[i]] = current[parts[i]] || {};
+        current = current[parts[i]];
+      }
+      current[parts[parts.length - 1]] = value;
+    } else {
+      result[key] = value;
+    }
+  }
+  
+  return result;
+}
+
+export function FunctionTestModal({ open, func, onClose }: Props) {
+  const [form] = Form.useForm<FormData>();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<TestResult | null>(null);
 
-  const handleTest = async (values: Record<string, any>) => {
+  const handleTest = async (values: FormData) => {
     setLoading(true);
     try {
-      const testResult = await testFunction(func, values);
+      // 处理表单值，将扁平的字段路径转换为嵌套对象
+      const processedValues = processFormValues(values);
+      const testResult = await testFunction(func, processedValues);
       setResult(testResult);
     } catch (error) {
-      setResult({
-        success: false,
-        error: error instanceof Error ? error.message : '测试失败',
-      });
+      console.error('测试失败:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleClose = () => {
+    form.resetFields();
+    setResult(null);
+    onClose();
   };
 
   return (
     <Modal
       title={`测试函数: ${func.name}`}
       open={open}
-      onCancel={onClose}
+      onCancel={handleClose}
       footer={null}
       width={800}
     >
-      <Form form={form} onFinish={handleTest} layout="vertical">
-        {Object.entries(func.parameters.properties).map(([key, param]) => (
-          <Form.Item
-            key={key}
-            name={key}
-            label={
-              <span>
-                {key}
-                {func.parameters.required.includes(key) && (
-                  <Text type="danger">*</Text>
-                )}
-                <Text type="secondary" className="ml-2">
-                  ({param.description})
-                </Text>
-              </span>
-            }
-            rules={[
-              {
-                required: func.parameters.required.includes(key),
-                message: `请输入${param.description}`,
-              },
-            ]}
-          >
-            {param.enum ? (
-              <Select>
-                {param.enum.map((value) => (
-                  <Select.Option key={value} value={value}>
-                    {value}
-                  </Select.Option>
-                ))}
-              </Select>
-            ) : (
-              <Input placeholder={`请输入${param.description}`} />
-            )}
-          </Form.Item>
-        ))}
+      <div className="mb-4">
+        <Text type="secondary">{func.description}</Text>
+      </div>
+
+      <Form
+        form={form}
+        onFinish={handleTest}
+        layout="vertical"
+      >
+        {Object.entries(func.parameters.properties).map(([key, value]: [string, any]) =>
+          renderNestedFormItems(key, value, func.parameters.required?.includes(key))
+        )}
 
         <Form.Item>
-          <Button type="primary" htmlType="submit" loading={loading}>
-            发送测试请求
-          </Button>
+          <Space>
+            <Button type="primary" htmlType="submit" loading={loading}>
+              测试
+            </Button>
+            <Button onClick={handleClose}>
+              关闭
+            </Button>
+          </Space>
         </Form.Item>
       </Form>
 
       {result && (
         <div className="mt-4">
-          <Alert
-            type={result.success ? 'success' : 'error'}
-            message={
-              result.success
-                ? `测试成功 (${result.duration}ms)`
-                : `测试失败: ${result.error}`
-            }
-            className="mb-4"
-          />
-          {result.success && result.data && (
-            <div className="bg-gray-50 p-4 rounded">
-              <pre className="whitespace-pre-wrap">
-                {JSON.stringify(result.data, null, 2)}
-              </pre>
+          <Text strong>测试结果：</Text>
+          <div className="mt-2">
+            <Text>耗时：{result.duration}ms</Text>
+          </div>
+          {result.success ? (
+            <div className="mt-2 p-4 bg-gray-50 rounded">
+              <JsonView data={result.data} style={defaultStyles} />
+            </div>
+          ) : (
+            <div className="mt-2 p-4 bg-red-50 text-red-500 rounded">
+              {result.error}
             </div>
           )}
         </div>

@@ -1,16 +1,15 @@
 import { FunctionDefinition } from '@/types/settings';
 import { message } from 'antd';
+import { processUrlParameters, processRequestBody } from '@/lib/utils/function-utils';
 
 export async function executeFunctionCall(
   functionDef: FunctionDefinition,
   args: Record<string, any>
 ) {
   try {
-    // 替换 URL 中的参数
-    let url = functionDef.url;
-    Object.entries(args).forEach(([key, value]) => {
-      url = url.replace(`{${key}}`, encodeURIComponent(String(value)));
-    });
+    // 处理 URL 参数和请求体
+    const url = processUrlParameters(functionDef.url, args);
+    const requestBody = processRequestBody(args, functionDef.parameters);
 
     const response = await fetch(url, {
       method: functionDef.method,
@@ -19,7 +18,7 @@ export async function executeFunctionCall(
         ...functionDef.headers,
       },
       ...(functionDef.method === 'POST' && {
-        body: JSON.stringify(args),
+        body: JSON.stringify(requestBody),
       }),
     }).catch(error => {
       const errorMessage = error.message.toLowerCase();

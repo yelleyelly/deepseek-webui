@@ -230,13 +230,39 @@ export function FunctionSettings() {
             name={['parameters', 'properties']}
             label="参数定义"
             rules={[{ required: true }]}
+            help="支持嵌套的 map 类型，可以定义对象内的字段结构"
           >
             <Input.TextArea 
               placeholder={JSON.stringify({
-                param1: { type: 'string', description: '参数描述' },
-                param2: { type: 'number', description: '参数描述' }
+                simple_param: { 
+                  type: 'string', 
+                  description: '简单参数示例' 
+                },
+                map_param: { 
+                  type: 'object',
+                  description: 'Map类型参数示例',
+                  properties: {
+                    key1: { type: 'string', description: '子字段1' },
+                    key2: { type: 'number', description: '子字段2' }
+                  },
+                  required: ['key1']
+                },
+                nested_map: {
+                  type: 'object',
+                  description: '嵌套Map类型示例',
+                  properties: {
+                    field1: {
+                      type: 'object',
+                      properties: {
+                        subfield1: { type: 'string' },
+                        subfield2: { type: 'number' }
+                      }
+                    },
+                    field2: { type: 'string' }
+                  }
+                }
               }, null, 2)}
-              rows={6}
+              rows={12}
             />
           </Form.Item>
           <Form.Item
