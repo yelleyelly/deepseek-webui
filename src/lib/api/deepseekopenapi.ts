@@ -33,7 +33,7 @@ export async function chatCompletion(
     validateMessages(messages, modelName);
 
     // 只在非 deepseek-reasoner 模型时启用函数调用
-    const tools = modelName !== 'deepseek-reasoner' ? settings.functions?.map(func => ({
+    const tools = modelName !== '' ? settings.functions?.map(func => ({
       type: 'function' as const,
       function: {
         name: func.name,
