@@ -33,14 +33,14 @@ export async function chatCompletion(
     validateMessages(messages, modelName);
 
     // 只在非 deepseek-reasoner 模型时启用函数调用
-    const tools = modelName !== '' ? settings.functions?.map(func => ({
+    const tools = settings.functions?.map(func => ({
       type: 'function' as const,
       function: {
         name: func.name,
         description: func.description,
         parameters: func.parameters,
       },
-    })) : undefined;
+    }));
 
     if (!apiKey || apiKey.length < 30) {
       throw new Error('请先在设置页面配置您的 DeepSeek API Key');
