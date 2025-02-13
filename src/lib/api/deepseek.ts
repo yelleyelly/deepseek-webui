@@ -269,10 +269,7 @@ export interface BalanceInfo {
 }
 
 export interface BalanceResponse {
-  code: number;
-  message: string;
-  status: boolean;
-  data: BalancdInfo[];
+  BalancdInfo[];
 }
 
 export async function getBalance(apiKey: string): Promise<BalanceResponse> {
