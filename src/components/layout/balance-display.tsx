@@ -43,6 +43,8 @@ export const BalanceDisplay = () => {
     return () => clearInterval(interval);
   }, [apiKey]);
 
+  if (!balance) return null;
+  
   return (
     <div className={styles.container}>
       <Card loading={loading} bordered={false} size="small" className={styles.card}>
