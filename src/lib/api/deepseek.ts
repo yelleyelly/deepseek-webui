@@ -254,7 +254,7 @@ export async function chatCompletion(
   }
 }
 
-export interface BalanceInfo {
+export interface BalanceResponse {
   id: string;
   name: string;
   image: string;
@@ -266,10 +266,6 @@ export interface BalanceInfo {
   role: string;
   chargeBalance: string;
   totalBalance: string;
-}
-
-export interface BalanceResponse {
-  BalancdInfo[];
 }
 
 export async function getBalance(apiKey: string): Promise<BalanceResponse> {
