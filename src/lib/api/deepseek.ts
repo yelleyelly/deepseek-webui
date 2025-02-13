@@ -254,18 +254,25 @@ export async function chatCompletion(
   }
 }
 
-
-
 export interface BalanceInfo {
-  currency: 'CNY' | 'USD';
-  total_balance: string;
-  granted_balance: string;
-  topped_up_balance: string;
+  id: string;
+  name: string;
+  image: string;
+  email: string;
+  isAdmin: boolean;
+  balance: string;
+  status: string;
+  introduction: string;
+  role: string;
+  chargeBalance: string;
+  totalBalance: string;
 }
 
 export interface BalanceResponse {
-  is_available: boolean;
-  balance_infos: BalanceInfo[];
+  code: number;
+  message: string;
+  status: boolean;
+  data: BalancdInfo[];
 }
 
 export async function getBalance(apiKey: string): Promise<BalanceResponse> {
