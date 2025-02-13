@@ -43,25 +43,20 @@ export const BalanceDisplay = () => {
     return () => clearInterval(interval);
   }, [apiKey]);
 
-  if (!balance || !balance.is_available) return null;
-
-  const cnyBalance = balance.balance_infos.find(info => info.currency === 'CNY');
-  if (!cnyBalance) return null;
-
   return (
     <div className={styles.container}>
       <Card loading={loading} bordered={false} size="small" className={styles.card}>
         <Tooltip
           title={
             <>
-              <div>赠金余额: ¥{cnyBalance.granted_balance}</div>
-              <div>充值余额: ¥{cnyBalance.topped_up_balance}</div>
+              <div>赠金余额: ¥{balance.totalBalance}</div>
+              <div>充值余额: ¥{balance.chargeBalance}</div>
             </>
           }
         >
           <Statistic
             title="账户余额"
-            value={cnyBalance.total_balance}
+            value={balance.chargeBalance}
             prefix={<WalletOutlined />}
             suffix="¥"
             precision={2}
