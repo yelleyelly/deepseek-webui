@@ -64,6 +64,20 @@
   @apply flex-1 min-w-0;
 }
 
+.messageReasoningTitle {
+  @apply text-sm ;
+  font-size: 12px;
+  line-height: 1.4;
+  background-color: #fff;
+}
+
+.messageReasoning {
+  @apply text-sm text-gray-500;
+  font-size: 12px;
+  line-height: 1.4;
+  background-color: #f0f0f0;
+}
+
 .messageTextContent {
   @apply text-sm prose prose-sm max-w-none;
 }

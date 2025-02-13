@@ -1,6 +1,7 @@
 
 export interface Message {
   role: 'system' | 'user' | 'assistant' | 'tool';
+  reasoning_content?: string;
   content: string;
   timestamp: number;
   tool_call_id?: string;

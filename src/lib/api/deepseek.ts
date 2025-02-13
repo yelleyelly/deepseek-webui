@@ -1,4 +1,4 @@
-import { Message, Settings } from '@/types';
+import { Settings } from '@/types';
 import { API_CONFIG } from './config';
 import { executeFunctionCall } from './function-handler';
 import { processRequestBody } from '@/lib/utils/function-utils';
@@ -21,6 +21,7 @@ export async function chatCompletion(
   settings: Settings,
   apiKey: string,
   onStream?: (content: string) => void,
+  onStreamReasoning?: (content: string) => void,
 ) {
   // const openai = new OpenAI({
   //   baseURL: API_CONFIG.BASE_URL,
@@ -88,6 +89,7 @@ export async function chatCompletion(
     const decoder = new TextDecoder();
     let buffer = '';
     let fullContent = '';
+    let fullReasoningContent = '';
     let currentToolCall: {
       id?: string;
       function?: {
@@ -121,6 +123,11 @@ export async function chatCompletion(
                 const content = parsed.choices[0].delta.content;
                 fullContent += content;
                 onStream?.(content);
+              }
+              if (parsed.choices?.[0]?.delta?.reasoning_content) {
+                const content = parsed.choices[0].delta.reasoning_content;
+                fullReasoningContent += content;
+                onStreamReasoning?.(content);
               }
 
               if (parsed.choices?.[0]?.delta?.tool_calls?.[0]) {
@@ -171,6 +178,7 @@ export async function chatCompletion(
                           {
                             role: 'assistant',
                             content: fullContent,
+                            // reasoning_content: fullReasoningContent,
                             tool_calls: [{
                               id: currentToolCall.id!,
                               type: 'function',
@@ -224,6 +232,11 @@ export async function chatCompletion(
                                 fullContent += content;
                                 onStream?.(content);
                               }
+                              if (secondParsed.choices?.[0]?.delta?.reasoning_content) {
+                                const content = secondParsed.choices[0].delta.reasoning_content;
+                                fullReasoningContent += content;
+                                onStreamReasoning?.(content);
+                              }
                             } catch (e) {
                               console.error('解析第二次响应数据失败:', e);
                             }
@@ -247,7 +260,10 @@ export async function chatCompletion(
       reader.releaseLock();
     }
 
-    return fullContent;
+    return {
+      content: fullContent,
+      reasoningContent: fullReasoningContent,
+    };
   } catch (error) {
     console.error('API 调用错误:', error);
     throw error;

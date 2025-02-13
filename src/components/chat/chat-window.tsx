@@ -7,6 +7,7 @@ import { Card, Avatar, Spin, Image } from 'antd';
 import { UserOutlined, RobotOutlined } from '@ant-design/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageContent } from './message-content';
+import { MessageContentR1 } from './message-content-r1';
 import { useEffect, useRef } from 'react';
 import styles from '@/styles/chat/chat-window.module.css';
 
@@ -14,6 +15,7 @@ export const ChatWindow = () => {
   const messages = useChatStore((state) => state.messages);
   const isLoading = useChatStore((state) => state.isLoading);
   const currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
+  const currentStreamingReasoningMessage = useChatStore((state) => state.currentStreamingReasoningMessage);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -22,7 +24,7 @@ export const ChatWindow = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, currentStreamingMessage]);
+  }, [messages, currentStreamingMessage, currentStreamingReasoningMessage]);
 
   return (
     <div className={styles.container}>
@@ -56,6 +58,14 @@ export const ChatWindow = () => {
                     className={message.role === 'assistant' ? 'bg-blue-500' : 'bg-green-500'}
                   />
                   <div className={styles.messageText}>
+                    {message.reasoning_content && (
+                      <div className={styles.messageReasoning}>
+                        <div className={styles.messageReasoningTitle}>
+                          R1思考过程:
+                        </div>
+                        <MessageContentR1 content={message.reasoning_content} />
+                      </div>
+                    )}
                     <div className={styles.messageTextContent}>
                       <MessageContent content={message.content} />
                     </div>
@@ -67,7 +77,7 @@ export const ChatWindow = () => {
               </Card>
             </motion.div>
           ))}
-          {currentStreamingMessage && (
+          {(currentStreamingMessage || currentStreamingReasoningMessage) && (
             <motion.div
               key="streaming"
               initial={{ opacity: 0, y: 20 }}
@@ -85,9 +95,19 @@ export const ChatWindow = () => {
                     className="bg-blue-500"
                   />
                   <div className={styles.messageText}>
-                    <div className={styles.messageTextContent}>
-                      <MessageContent content={currentStreamingMessage} />
+                    {
+                      currentStreamingReasoningMessage && <div className={styles.messageReasoning}>
+                      <div className={styles.messageReasoningTitle}>
+                        R1思考中...
+                      </div>
+                      <MessageContentR1 content={currentStreamingReasoningMessage} />
                     </div>
+                    }
+                    {
+                      currentStreamingMessage && <div className={styles.messageTextContent}>
+                        <MessageContent content={currentStreamingMessage} />
+                      </div>
+                    }
                     <div className={styles.messageTime}>
                       {formatDate(Date.now())}
                     </div>

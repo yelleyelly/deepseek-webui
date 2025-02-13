@@ -1,4 +1,4 @@
-import { Message, Settings } from '@/types';
+import { Settings } from '@/types';
 import { API_CONFIG } from './config';
 import { executeFunctionCall } from './function-handler';
 // import OpenAI from 'openai';

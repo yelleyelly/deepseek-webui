@@ -33,7 +33,7 @@ const menuItems = [
     label: <Link href="/workflows ">COZE插件配置</Link>,
   },
   {
-    key: '/settings',
+    key: '/functions',
     icon: <SettingOutlined />,
     label: <Link href="/settings">设置</Link>,
   },

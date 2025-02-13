@@ -24,6 +24,7 @@ export const ChatInput = () => {
     setLoading, 
     clearMessages,
     setCurrentStreamingMessage,
+    setCurrentStreamingReasoningMessage,
   } = useChatStore();
   const { settings, apiKey, updateSettings } = useSettingsStore();
 
@@ -64,7 +65,7 @@ export const ChatInput = () => {
     // 这里可以添加从服务器删除文件的逻辑，如果需要的话
   };
 
-  const sendMessage = async (content: string) => {
+  const sendMessage = async (content: string, reasoning_content?: string) => {
     if (!apiKey) {
       message.error('请先设置 API Key');
       return;
@@ -74,12 +75,14 @@ export const ChatInput = () => {
       role: 'user' as const,
       content: content.trim(),
       timestamp: Date.now(),
+      reasoning_content: reasoning_content ? reasoning_content?.trim() : '',
     };
 
     try {
       addMessage(userMessage);
       setLoading(true);
       setCurrentStreamingMessage('');
+      setCurrentStreamingReasoningMessage('');
 
       const messageList = settings.systemPrompt
         ? [
@@ -90,6 +93,7 @@ export const ChatInput = () => {
         : [...messages, userMessage];
 
       let streamContent = '';
+      let reasoningContent = '';
       const response = await chatCompletion(
         messageList as ChatCompletionMessageParam[], 
         settings, 
@@ -97,13 +101,18 @@ export const ChatInput = () => {
         (content: string) => {
           streamContent += content;
           setCurrentStreamingMessage(streamContent);
+        },
+        (content: string) => {
+          reasoningContent += content;
+          setCurrentStreamingReasoningMessage(reasoningContent);
         }
       );
 
       addMessage({
         role: 'assistant',
-        content: response,
+        content: response.content,
         timestamp: Date.now(),
+        reasoning_content: response.reasoningContent,
       });
 
       // 清空文件列表和ID
@@ -119,6 +128,7 @@ export const ChatInput = () => {
     } finally {
       setLoading(false);
       setCurrentStreamingMessage(null);
+      setCurrentStreamingReasoningMessage(null);
     }
   };
 
@@ -192,7 +202,7 @@ export const ChatInput = () => {
           disabled={isLoading} 
         />
         <div className={styles.toolbarActions}>
-          <Upload
+          {/* <Upload
             multiple
             showUploadList={false}
             beforeUpload={handleFileUpload}
@@ -205,7 +215,7 @@ export const ChatInput = () => {
                 disabled={isLoading}
               />
             </Tooltip>
-          </Upload>
+          </Upload> */}
           <Tooltip title="导出对话">
             <Button
               icon={<DownloadOutlined />}

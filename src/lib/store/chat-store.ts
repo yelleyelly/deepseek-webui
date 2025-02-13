@@ -7,12 +7,14 @@ interface ChatState {
   settings: ChatSettings;
   isLoading: boolean;
   currentStreamingMessage: string | null;
+  currentStreamingReasoningMessage: string | null;
   addMessage: (message: Message) => void;
   clearMessages: () => void;
   updateSettings: (settings: Partial<ChatSettings>) => void;
   setLoading: (loading: boolean) => void;
   appendToLastMessage: (content: string) => void;
   setCurrentStreamingMessage: (content: string | null) => void;
+  setCurrentStreamingReasoningMessage: (content: string | null) => void;
 }
 
 const defaultSettings: ChatSettings = {
@@ -32,11 +34,13 @@ export const useChatStore = create<ChatState>()(
       settings: defaultSettings,
       isLoading: false,
       currentStreamingMessage: null,
+      currentStreamingReasoningMessage: null,
       addMessage: (message) => set((state) => ({ 
         messages: [...state.messages, message],
-        currentStreamingMessage: null
+        currentStreamingMessage: null,
+        currentStreamingReasoningMessage: null
       })),
-      clearMessages: () => set({ messages: [], currentStreamingMessage: null }),
+      clearMessages: () => set({ messages: [], currentStreamingMessage: null, currentStreamingReasoningMessage: null }),
       updateSettings: (newSettings) => set((state) => ({
         settings: { ...state.settings, ...newSettings }
       })),
@@ -50,6 +54,7 @@ export const useChatStore = create<ChatState>()(
         return { messages };
       }),
       setCurrentStreamingMessage: (content) => set({ currentStreamingMessage: content }),
+      setCurrentStreamingReasoningMessage: (content) => set({ currentStreamingReasoningMessage: content }),
     }),
     {
       name: 'chat-store',
