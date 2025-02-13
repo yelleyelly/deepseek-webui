@@ -21,7 +21,7 @@ export const BalanceDisplay = () => {
     try {
       setLoading(true);
       const data = await getBalance(apiKey);
-      console.log(balance);
+      console.error(data);
       setBalance(data);
     } catch (error) {
       console.error('获取余额失败:', error);
