@@ -251,18 +251,18 @@ export async function chatCompletion(
   }
 }
 
-
-
-export interface BalanceInfo {
-  currency: 'CNY' | 'USD';
-  total_balance: string;
-  granted_balance: string;
-  topped_up_balance: string;
-}
-
 export interface BalanceResponse {
-  is_available: boolean;
-  balance_infos: BalanceInfo[];
+  id: string;
+  name: string;
+  image: string;
+  email: string;
+  isAdmin: boolean;
+  balance: string;
+  status: string;
+  introduction: string;
+  role: string;
+  chargeBalance: string;
+  totalBalance: string;
 }
 
 export async function getBalance(apiKey: string): Promise<BalanceResponse> {
@@ -270,7 +270,7 @@ export async function getBalance(apiKey: string): Promise<BalanceResponse> {
     throw new Error('请先设置 API Key');
   }
 
-  const response = await fetch(`${API_CONFIG.BASE_URL}/user/balance`, {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/user/info`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
@@ -282,7 +282,7 @@ export async function getBalance(apiKey: string): Promise<BalanceResponse> {
   }
 
   return response.json();
-}
+} 
 
 interface UploadFileResponse {
   code: number;
