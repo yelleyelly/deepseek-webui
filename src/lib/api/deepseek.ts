@@ -273,7 +273,7 @@ export async function getBalance(apiKey: string): Promise<BalanceResponse> {
     throw new Error('请先设置 API Key');
   }
 
-  const response = await fetch(`${API_CONFIG.BASE_URL}/user/info1`, {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/user/info`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
