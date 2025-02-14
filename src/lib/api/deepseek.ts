@@ -255,32 +255,35 @@ export async function chatCompletion(
 }
 
 export interface BalanceData {
-  id: string;
-  name: string;
-  image: string;
-  email: string;
-  isAdmin: boolean;
   balance: string;
-  status: string;
-  introduction: string;
-  role: string;
+  category: string;
   chargeBalance: string;
+  email: string;
+  id: string;
+  image: string;
+  introduction: string;
+  isAdmin: boolean;
+  name: string;
+  role: string;
+  status: string;
   totalBalance: string;
 }
 
 export interface BalanceResponse {
-  id: string;
-  name: string;
-  image: string;
-  email: string;
-  isAdmin: boolean;
   balance: string;
-  status: string;
-  introduction: string;
-  role: string;
+  category: string;
   chargeBalance: string;
+  email: string;
+  id: string;
+  image: string;
+  introduction: string;
+  isAdmin: boolean;
+  name: string;
+  role: string;
+  status: string;
   totalBalance: string;
-  data: BalanceData[];
+  
+  //data: BalanceData[];
 }
 
 export async function getBalance(apiKey: string): Promise<BalanceResponse> {
