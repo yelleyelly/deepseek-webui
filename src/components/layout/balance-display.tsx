@@ -54,13 +54,13 @@ export const BalanceDisplay = () => {
           title={
             <>
               <div>赠金余额: ¥{balance.data.balance}</div>
-              <div>充值余额: ¥{balance.data.chargeBalance}</div>
+              <div>总余额: ¥{balance.data.totalBalance}</div>
             </>
           }
         >
           <Statistic
             title="账户余额"
-            value={balance.data.totalBalance}
+            value={balance.data.chargeBalance}
             prefix={<WalletOutlined />}
             suffix="¥"
             precision={2}
