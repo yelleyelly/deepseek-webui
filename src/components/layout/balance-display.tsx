@@ -21,7 +21,6 @@ export const BalanceDisplay = () => {
     try {
       setLoading(true);
       const data = await getBalance(apiKey);
-      console.error(data);
       setBalance(data);
     } catch (error) {
       console.error('获取余额失败:', error);
@@ -45,8 +44,6 @@ export const BalanceDisplay = () => {
   }, [apiKey]);
 
   if (!balance) return null;
-  console.error(balance);
-  console.error(balance.data.totalBalance);
   return (
     <div className={styles.container}>
       <Card loading={loading} bordered={false} size="small" className={styles.card}>
