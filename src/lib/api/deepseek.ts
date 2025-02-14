@@ -283,6 +283,7 @@ export async function getBalance(apiKey: string): Promise<BalanceResponse> {
   if (!response.ok) {
     throw new Error('获取余额失败');
   }
+  console.error("test");
   console.error(response.json());
   return response.json();
 } 
