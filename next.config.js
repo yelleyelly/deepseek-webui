@@ -6,7 +6,7 @@ const nextConfig = {
     domains: ['api.star-history.com'],
   },
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: process.env.NODE_ENV === 'productionx',
   },
   poweredByHeader: false,
   compress: true,
