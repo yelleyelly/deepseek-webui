@@ -45,7 +45,8 @@ export const BalanceDisplay = () => {
   }, [apiKey]);
 
   if (!balance) return null;
-
+  console.error(balance);
+  console.error(balance.totalBalance);
   return (
     <div className={styles.container}>
       <Card loading={loading} bordered={false} size="small" className={styles.card}>
