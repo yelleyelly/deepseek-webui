@@ -46,21 +46,21 @@ export const BalanceDisplay = () => {
 
   if (!balance) return null;
   console.error(balance);
-  console.error(balance.totalBalance);
+  console.error(balance.data.totalBalance);
   return (
     <div className={styles.container}>
       <Card loading={loading} bordered={false} size="small" className={styles.card}>
         <Tooltip
           title={
             <>
-              <div>赠金余额: ¥{balance.balance}</div>
-              <div>充值余额: ¥{balance.chargeBalance}</div>
+              <div>赠金余额: ¥{balance.data.balance}</div>
+              <div>充值余额: ¥{balance.data.chargeBalance}</div>
             </>
           }
         >
           <Statistic
             title="账户余额"
-            value={balance.totalBalance}
+            value={balance.data.totalBalance}
             prefix={<WalletOutlined />}
             suffix="¥"
             precision={2}
