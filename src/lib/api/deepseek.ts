@@ -116,6 +116,7 @@ export async function chatCompletion(
 
             try {
               const parsed = JSON.parse(data);
+              console.log(parsed);
 
               if (parsed.choices?.[0]?.delta?.content) {
                 const content = parsed.choices[0].delta.content;
