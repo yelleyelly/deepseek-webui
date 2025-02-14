@@ -271,7 +271,7 @@ export interface BalanceData {
 
 export interface BalanceResponse {
   code: number;
-  data: BalanceData[];
+  data: BalanceData;
   message: string;
   status: boolean;
 }
