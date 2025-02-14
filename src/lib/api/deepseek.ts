@@ -125,6 +125,7 @@ export async function chatCompletion(
 
               if (parsed.choices?.[0]?.delta?.tool_calls?.[0]) {
                 const toolCallDelta = parsed.choices[0].delta.tool_calls[0];
+                console.log(toolCallDelta);
 
                 if (toolCallDelta.id) {
                   currentToolCall.id = toolCallDelta.id;
