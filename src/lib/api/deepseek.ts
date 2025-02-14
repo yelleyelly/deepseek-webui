@@ -270,20 +270,10 @@ export interface BalanceData {
 }
 
 export interface BalanceResponse {
-  balance: string;
-  category: string;
-  chargeBalance: string;
-  email: string;
-  id: string;
-  image: string;
-  introduction: string;
-  isAdmin: boolean;
-  name: string;
-  role: string;
-  status: string;
-  totalBalance: string;
-  
-  //data: BalanceData[];
+  code: number;
+  data: BalanceData[];
+  message: string;
+  status: boolean;
 }
 
 export async function getBalance(apiKey: string): Promise<BalanceResponse> {
