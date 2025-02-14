@@ -254,6 +254,20 @@ export async function chatCompletion(
   }
 }
 
+export interface BalanceData{
+  id: string;
+  name: string;
+  image: string;
+  email: string;
+  isAdmin: boolean;
+  balance: string;
+  status: string;
+  introduction: string;
+  role: string;
+  chargeBalance: string;
+  totalBalance: string;
+}
+
 export interface BalanceResponse {
   id: string;
   name: string;
@@ -266,6 +280,7 @@ export interface BalanceResponse {
   role: string;
   chargeBalance: string;
   totalBalance: string;
+  data[]: object;
 }
 
 export async function getBalance(apiKey: string): Promise<BalanceResponse> {
