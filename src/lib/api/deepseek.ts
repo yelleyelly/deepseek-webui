@@ -59,7 +59,7 @@ export async function chatCompletion(
         messages: messages.map(({ role, content }) => ({ role, content })),
         temperature: settings.temperature,
         ...(tools && tools.length > 0 ? { tools } : {}),
-        stream: false,
+        stream: true,
       }),
     });
 
@@ -101,7 +101,7 @@ export async function chatCompletion(
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: false });
+        const chunk = decoder.decode(value, { stream: true });
         buffer += chunk;
 
         const lines = buffer.split('\n');
@@ -189,7 +189,7 @@ export async function chatCompletion(
                           },
                         ],
                         temperature: settings.temperature,
-                        stream: false,
+                        stream: true,
                       }),
                     });
 
@@ -206,7 +206,7 @@ export async function chatCompletion(
                         const { done, value } = await secondReader.read();
                         if (done) break;
 
-                        const secondChunk = decoder.decode(value, { stream: false });
+                        const secondChunk = decoder.decode(value, { stream: true });
                         secondBuffer += secondChunk;
 
                         const secondLines = secondBuffer.split('\n');
