@@ -144,6 +144,7 @@ export async function chatCompletion(
                 if (currentToolCall.id &&
                   currentToolCall.function?.name &&
                   typeof currentToolCall.function.arguments === 'string') {
+                  console.log(currentToolCall.function.arguments);
 
                   const functionDef = settings.functions?.find(
                     f => f.name === currentToolCall.function?.name
