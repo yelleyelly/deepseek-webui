@@ -99,6 +99,7 @@ export async function chatCompletion(
     try {
       while (true) {
         const { done, value } = await reader.read();
+        console.log(done, value);
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
