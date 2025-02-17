@@ -103,6 +103,7 @@ export async function chatCompletion(
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
+        console.log(chunk);
         buffer += chunk;
 
         const lines = buffer.split('\n');
